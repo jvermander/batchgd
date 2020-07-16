@@ -8,7 +8,7 @@ import algorithms as alg
 import plots as pt
 
 def main(argv):
-  csv = "csv/ex1data2.csv"
+  csv = "../csv/ex1data2.csv"
   alpha = 0.1
   iterations = 400
   theta, mu, sigma = linreg_gd(csv, alpha, iterations, True)
