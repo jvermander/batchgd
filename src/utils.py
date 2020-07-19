@@ -8,14 +8,14 @@ def get_matrices( path_to_data, normalize=False ):
   if(normalize):
     X, mu, sigma = normalize_features(X)
   X = create_design(X)
-  theta = np.zeros((X.shape[1], 1))
+  theta = np.zeros((X.shape[1],))
 
   return X, y, theta, mu, sigma
 
 def read_csv( path ):
   data = pd.read_csv(path).values
   X = data[:, 0:-1]
-  y = data[:, -1].reshape((-1, 1))
+  y = data[:, -1]
   return X, y
 
 def normalize_features( X ):
@@ -37,7 +37,6 @@ def create_design( X ):
   
 
 def predict( X, theta, mu=None, sigma=None ):
-  assert(X.shape[1]+1 == theta.shape[0])
 
   if(mu is not None and sigma is not None):
     X_norm = np.zeros(X.shape)
@@ -45,5 +44,20 @@ def predict( X, theta, mu=None, sigma=None ):
       X_norm[:, i] = ((X[:, i] - mu[0, i]) / sigma[0, i])
     X = X_norm
 
-  return create_design(X) @ theta
+  return X @ theta
+
+def add_features( X1, X2, degree ):
+  assert(X1.shape == X2.shape)
+
+  columns = (degree * (degree + 1))/2 + degree + 1# n(n+1)/2 + n + 1
+  result = np.ones((X1.shape[0],int(columns)))
+
+  k = 1
+  for i in range(1, degree+1):
+    for j in range(i+1):
+      result[:, k] = np.multiply(X1 ** (i-j), X2 ** j)
+      k += 1
+  assert(k == columns)
+  return result  
+
 
