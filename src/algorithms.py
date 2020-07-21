@@ -77,3 +77,14 @@ def reg_gradient( theta, l, m ):
   result[0] -= (l / m) * theta[0]
   return result
 
+def multiclass_logreg( X, y, l, degree ):
+  X = ut.create_design(X)
+  theta = np.zeros((degree, X.shape[1]))
+  for i in range(degree):
+    res = opt.minimize(cross_ent, theta[i, :], 
+                    (X, y == i, l), jac=cross_ent_gradient,
+                    method='L-BFGS-B',
+                    options={'maxiter': 50})
+    # print(res)
+    theta[i, :] = res.x
+  return theta
