@@ -1,21 +1,21 @@
 import pandas as pd
 import numpy as np
+import scipy.io as io
+import scipy.optimize as opt
+import time
 
-def get_matrices( path_to_data, normalize=False ):
-  X, y = read_csv(path_to_data)
-  mu = None
-  sigma = None
-  if(normalize):
-    X, mu, sigma = normalize_features(X)
-  X = create_design(X)
-  theta = np.zeros((X.shape[1],))
-
-  return X, y, theta, mu, sigma
+import algorithms as alg
 
 def read_csv( path ):
   data = pd.read_csv(path).values
   X = data[:, 0:-1]
   y = data[:, -1]
+  return X, y
+
+def read_mat( path ):
+  data = io.loadmat(path)
+  X = data['X']
+  y = data['y'].reshape(-1)
   return X, y
 
 def normalize_features( X ):
@@ -58,6 +58,22 @@ def add_features( X1, X2, degree ):
       result[:, k] = np.multiply(X1 ** (i-j), X2 ** j)
       k += 1
   assert(k == columns)
-  return result  
+  return result
+
+def multiclass_logreg( X, y, l, degree ):
+  X = create_design(X)
+  theta = np.zeros((degree, X.shape[1]))
+  for i in range(degree):
+    res = opt.minimize(alg.cross_ent, theta[i, :], 
+                    (X, y == i, l), jac=alg.cross_ent_gradient,
+                    method='L-BFGS-B',
+                    options={'maxiter': 50})
+    # print(res)
+    theta[i, :] = res.x
+  return theta
+
+def multiclass_prediction( theta, X ):
+  X = create_design(X)
+  return np.argmax(theta @ X.T, axis=0)
 
 

@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+import scipy.optimize as opt
+
+import utils as ut
 
 def batch_gd( X, y, theta, alpha, iterations, gradient, l=0 ):
   assert(callable(gradient))

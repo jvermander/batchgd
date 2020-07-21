@@ -12,9 +12,9 @@ np.set_printoptions(edgeitems=5)
 np.core.arrayprint._line_width = 180
 
 def main(argv):
-
-  ex1()
-  ex2()
+  # ex1()
+  # ex2()
+  ex3()
   return
 
 def ex1():
@@ -29,7 +29,14 @@ def ex1():
   print("Theta = \n", theta)
   print("Predict 1 =", ut.predict(np.array([[1, 6.1101]]), theta) * 10 ** 4)
   print("Predict 2 =", ut.predict(np.array([[1, 7]]), theta) * 10 ** 4)
+  
+  theta = np.zeros((X.shape[1]),)
+  res = opt.minimize(alg.SSD, theta, (X, y), jac=alg.SSD_gradient, method='Newton-CG', options={"maxiter": 1500})
+  print("Theta = \n", res.x)
+  print("Predict 1 =", ut.predict(np.array([[1, 6.1101]]), res.x) * 10 ** 4)
+  print("Predict 2 =", ut.predict(np.array([[1, 7]]), res.x) * 10 ** 4)
 
+  print("Data2:")
   X, y = ut.read_csv('csv/ex1data2.csv')
   X, mu, sigma = ut.normalize_features(X)
   X = ut.create_design(X)
@@ -80,44 +87,32 @@ def ex2():
   p = np.mean(np.round(alg.sigmoid(X @ theta)) == y) * 100
   print("Training Accuracy =", p)
 
-def linreg_gd( csv, alpha, iterations, l, normalize=False ):
-  X, y, theta, mu, sigma = ut.get_matrices(csv, normalize)
-  J = alg.batch_gd_debig(X, y, theta, alpha, iterations, alg.SSD_gradient, alg.SSD, l)
-  print("Theta =\n", theta)
+def ex3():
+  X, y = ut.read_mat('mat/ex3data1.mat')
+  for i in range(y.shape[0]):
+    if(y[i] == 10): y[i] = 0;
 
-  print("Optimal theta = \n", alg.normal_eqn(X, y))
+  theta = np.array([-2, -1, 1, 2])
+  X_t = ut.create_design(np.arange(1, 16, 1).reshape(3, 5).T/10)
+  y_t = np.array(([1, 0, 1, 0, 1]))
+  l_t = 3
+  cost = alg.cross_ent(theta, X_t, y_t, l_t)
+  grad = alg.cross_ent_gradient(theta, X_t, y_t, l_t)
+  print("Expected / Actual:")
+  print("2.534819 / %f" % cost)
+  print("0.146561 / %f" % grad[0])
+  print("-0.548558 / %f" % grad[1])
+  print("0.724722 / %f" % grad[2])
+  print("1.398003 / %f" % grad[3])
+  
+  degree = 10
+  l = 0.1
+  theta = ut.multiclass_logreg(X, y, l, degree)
+  p = ut.multiclass_prediction(theta, X)
+  print(p.shape)
+  print("95 / %f" % (np.mean(p == y) * 100))
+  return
 
-  pt.plot_cost(J, iterations)  
-  return theta, mu, sigma
-
-def logreg_gd( csv, alpha, iterations, l, normalize=False ):
-  X, y, theta, mu, sigma = ut.get_matrices(csv, normalize)
-  X = ut.add_features(X[:, 1], X[:, 2], 6)
-  theta = np.zeros((X.shape[1], 1))
-
-  J = alg.batch_gd(X, y, theta, alpha, iterations, alg.cross_ent_gradient, alg.cross_ent, 10)
-  print("Theta =\n", theta)
-
-  pt.plot_cost(J, iterations)
-  p = np.round(alg.sigmoid(X @ theta))
-  print(np.mean(np.equal(p, y)) * 100)
-  return theta, mu, sigma
 
 if(__name__ == "__main__"):
   main(sys.argv[1:])
-
-
-  #   alpha = 0.1
-  # iterations = 400
-  # theta, mu, sigma = linreg_gd(csv, alpha, iterations, True)
-
-  # while(True):
-  #   X = np.zeros((1, theta.shape[0]-1))
-  #   for i in range(X.shape[1]):
-  #     val = input(">> ")
-  #     if(val == 'q'):
-  #       return
-  #     else:
-  #       val = float(val)
-  #     X[0, i] = val
-  #   print("Predictions =\n", ut.predict(X, theta, mu, sigma))
