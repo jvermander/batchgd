@@ -46,7 +46,7 @@ def SSD_gradient( theta, X, y, l=0 ):
   return result
 
 # Logistic Regression cost function:
-# Cross-Entropy / Log Loss
+# Binary Cross-Entropy / Log Loss
 
 def cross_ent( theta, X, y, l=0 ):
   assert(theta.ndim == 1)
@@ -88,3 +88,9 @@ def multiclass_logreg( X, y, l, degree ):
     # print(res)
     theta[i, :] = res.x
   return theta
+
+
+
+
+  def nn_cost( w, X, y, l ):
+    return
