@@ -16,12 +16,9 @@ np.core.arrayprint._line_width = 180
 warnings.filterwarnings("ignore", category=RuntimeWarning) 
 
 def main(argv):
-
-
   # test1()
   # test2()
   # test3()
-
   test4()  
 
   return
@@ -96,7 +93,7 @@ def test2():
   print("0.693147 / ", cost)
   print("-0.1000 / ", grad[0])
   print("-12.0092 / ", grad[1])
-  print("-111.2628 / ", grad[2])
+  print("-11.2628 / ", grad[2])
   res = opt.minimize(alg.cross_ent, theta, (X, y), 
                method='BFGS', 
                jac=alg.cross_ent_gradient,
@@ -211,15 +208,15 @@ def test3neuralnet( theta1, theta2, a_1 ):
   a_2 = alg.sigmoid(a_1 @ theta1.T)
   a_2 = ut.create_design(a_2)
   a_3 = alg.sigmoid(theta2 @ a_2.T)
-  # p = np.argmax(a_3, axis=0) + 1
-  # return p
+  p = np.argmax(a_3, axis=0) + 1
+  return p
   return a_3
 
 def test4():
   print("\n\nTest 4 - Neural Networks")
   print("Expected / Actual:")
 
-  print("\nForward Propagation & Cost Function: ")
+  print("\nForward Propagation & Cost: ")
   X, y = ut.read_mat('mat/ex4data1.mat')
   data = io.loadmat('mat/ex4weights.mat')
   w1 = data['Theta1'][:, 1:]
@@ -232,30 +229,37 @@ def test4():
   net = nn.Neural(layers, X, y)
   net.weight = np.concatenate([w1.flatten(), w2.flatten()])
   net.bias = np.concatenate([b1.flatten(), b2.flatten()])
-  result = net.fp()
-  print("J = ", net.cost['f'](net))
-  # b1 = np.ones(b1.shape)
-  # a0 = np.zeros((w1.shape[1], 5000))
+  result = net.fp().T
+  print("0.00011266 / %.8f" % result[0,0])
+  print("0.9907 / %.4f" % result[2665, 4])
+  print("0.000047972 / %.9f" % result[321, 0])
+  print("0.0819 / %.4f" % result[-1, -1])
+  print("0.287629 / %.6f" % net.cost())
 
-  # a = np.array( [ [1,7,3,4], [3,2,4,1] ] )
-  # print(a)
-  # f = a.flatten()
-  # f[0] = 322
-  # print(a)
-  # print(f)
-  # r = a.ravel()
-  # r[0] = 322
-  # print(a)
-  # print(r)
-  # a[0] = 666
-  # print(a)
-  # print(r)
+  print("\nRegularized Cost:")
+  net.l = 1
+  print("0.383770 / %.6f" % net.cost())
 
-  # print(w1.shape)
-  # print(a0.shape)
-  # print(b1.shape)
-  # z1 = w1.dot(a0) + b1.reshape(25,1)
-  # print(z1)
+  print("\nSigmoid Derivative:")
+  print("0.25 / ", net.sigmoid_deriv(net.sigmoid(0)))
+
+  print("\nBackpropagation: ")
+  grad = net.bp()
+  print("(10285,) /", grad.shape)
+  print("0.0000015972 /", grad[5])
+  print("0.00015668 /", grad[666])
+  print("-0.0011 /", grad[-(net.bias.shape[0]+55)])
+  print(grad[-(net.bias.shape[0]+10): -net.bias.shape[0]])
+
+  print(" /", grad[-(net.bias.shape[0]):-(net.bias.shape[0]-10)])
+  print(" /", grad[-10:])
+
+
+  print("< 1e-9 / ", nn.Neural.debug_bp())
+
+
+
+  
 
   return
 
