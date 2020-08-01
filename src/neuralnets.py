@@ -13,6 +13,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 class Neural(object):
 
+  # fix for 0-index
   # for classifications in (1 ... degree)
   # instead of in (0 ... degree-1)
   def binarize_ground_truth( y, degree ):
@@ -35,8 +36,8 @@ class Neural(object):
     J += self.l / 2 / self.m * np.sum(self.weight ** 2)     
     return J  
 
-  def binary_cross_entropy_deriv( x ):
-    return
+  def binary_cross_entropy_deriv( self ):
+    return self.p - self.y
 
   def sigmoid( self, x ):
     return 1 / (1 + np.exp(-x))
@@ -127,7 +128,7 @@ class Neural(object):
     gradient = np.zeros(self.weight.shape)
     b_gradient = np.zeros(self.bias.shape)
 
-    delta = self.p - self.y
+    delta = self.cost_deriv() 
     grad_start = 0
     b_grad_start = 0
     a_start = self.layer_size[self.num_layers-1] * self.m
@@ -152,11 +153,13 @@ class Neural(object):
 
       a_end = a_start
       a_start += input * self.m
-
       a = self.a[ -a_start : -a_end ].reshape(input, self.m)
-      gradient[ -grad_start : None if grad_end is 0 else -grad_end ] = delta.dot(a.T).flatten()
-      b_gradient[ -b_grad_start : None if b_grad_end is 0 else -b_grad_end ] = np.sum(delta, axis=1).flatten()
+      
+      regularize = self.l * self.weight[-grad_start : None if grad_end is 0 else -grad_end]
 
+      gradient[ -grad_start : None if grad_end is 0 else -grad_end ] = delta.dot(a.T).flatten() + regularize
+      b_gradient[ -b_grad_start : None if b_grad_end is 0 else -b_grad_end ] = np.sum(delta, axis=1).flatten()
+  
     result = np.concatenate((gradient, b_gradient)) / self.m
     return result
 
@@ -200,4 +203,38 @@ class Neural(object):
 
       numgrad[i + j] = (loss1 - loss2) / (2 * e)
 
+    for i in range(grad.shape[0]):
+      print("%f / %f" % (numgrad[i], grad[i]))
+
     return np.linalg.norm(numgrad - grad) / np.linalg.norm(grad + numgrad)
+
+  def parametrize(self, iter=100, alg='L-BFGS-B'):
+    theta = np.concatenate((self.weight, self.bias))
+    result = opt.minimize(Neural.cost, theta, args=(self), jac=Neural.gradient,
+      method=alg, options={'maxiter': iter})
+    print(result)
+    self.assign(result.x)
+    return
+
+  def assign(self, theta):
+    numweight = self.weight.shape[0]
+    self.weight = theta[:numweight]
+    self.bias = theta[numweight:]
+
+  def cost(theta, network):
+    network.assign(theta)
+    return network.cost()
+    
+  
+  def gradient(theta, network):
+    network.assign(theta)
+    return network.bp()
+
+  # fix for 0-index
+  def predict( self, X ):
+    assert(X.shape[1] == self.layer_size[0])
+    self.a[:X.shape[1] * self.m] = X.T.flatten()
+    p = self.fp()
+    degree = p.shape[0]
+    p = np.argmax(p, axis=0) + 1
+    return Neural.binarize_ground_truth(p, degree)

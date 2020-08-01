@@ -230,6 +230,7 @@ def test4():
   net.weight = np.concatenate([w1.flatten(), w2.flatten()])
   net.bias = np.concatenate([b1.flatten(), b2.flatten()])
   result = net.fp().T
+
   print("0.00011266 / %.8f" % result[0,0])
   print("0.9907 / %.4f" % result[2665, 4])
   print("0.000047972 / %.9f" % result[321, 0])
@@ -242,24 +243,34 @@ def test4():
 
   print("\nSigmoid Derivative:")
   print("0.25 / ", net.sigmoid_deriv(net.sigmoid(0)))
-
+  
+  net.l = 0
   print("\nBackpropagation: ")
   grad = net.bp()
   print("(10285,) /", grad.shape)
-  print("0.0000015972 /", grad[5])
-  print("0.00015668 /", grad[666])
-  print("-0.0011 /", grad[-(net.bias.shape[0]+55)])
-  print(grad[-(net.bias.shape[0]+10): -net.bias.shape[0]])
+  print("0.0000015972 /%.10f" % grad[5])
+  print("0.00015668 / %.8f" % grad[666])
+  print("-0.0011 / %.4f" % grad[-(net.bias.shape[0]+55)])
+  print("0.00077333 / %.8f" % grad[-(net.bias.shape[0]+1)])
 
-  print(" /", grad[-(net.bias.shape[0]):-(net.bias.shape[0]-10)])
-  print(" /", grad[-10:])
-
-
+  print("0.000061871 / %.9f" % grad[-(net.bias.shape[0])])
+  print("-0.000037065 / %.9f" % grad[-(net.bias.shape[0]-15)])
+  print("0.00024755 / %.8f" % grad[-1])
   print("< 1e-9 / ", nn.Neural.debug_bp())
-
-
-
   
+  print("\nBackpropagation, with regularization:")
+  net.l = 3
+  print("0.576051 / %f" % net.binary_cross_entropy())
+  net.fp()
+  net.bp()
+  print("< 1e-9 /", nn.Neural.debug_bp())
+
+  print("\nGradient descent: ")
+  net = nn.Neural(layers, X, y)
+  net.l = 30
+  net.parametrize(1000)
+  p = net.predict(X)
+  print("Training accuracy: ", np.mean(p == y) * 100)
 
   return
 
