@@ -26,6 +26,12 @@ def batch_gd_debug( X, y, theta, alpha, iterations, gradient, cost, l=0 ):
   
   return cost_history
 
+def parametrize_linear( X, y, l=0 ):
+  theta = np.zeros((X.shape[1],1))
+  m = y.shape[0]
+
+  return opt.minimize(SSD, theta, (X, y, l), jac=SSD_gradient, method='L-BFGS-B').x
+
 def normal_eqn( X, y ):
   return np.linalg.pinv(X.T @ X) @ X.T @ y
 
@@ -89,8 +95,13 @@ def multiclass_logreg( X, y, l, degree ):
     theta[i, :] = res.x
   return theta
 
+def plotErrVsNumEx(X, y, Xval, yval, l):
+  train_error = np.zeros(y.shape)
+  validation_error = np.zeros(y.shape)
 
+  for i in range(y.shape[0]):
+    theta = parametrize_linear(X[0:i+1, :], y[0:i+1], 0)
+    train_error[i] = SSD(theta, X[0:i+1], y[0:i+1], 0)
+    validation_error = SSD(theta, Xval, yval, 0)
 
-
-  def nn_cost( w, X, y, l ):
-    return
+  return train_error, validation_error

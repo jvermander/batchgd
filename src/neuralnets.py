@@ -208,7 +208,7 @@ class Neural(object):
 
     return np.linalg.norm(numgrad - grad) / np.linalg.norm(grad + numgrad)
 
-  def parametrize(self, iter=100, alg='L-BFGS-B'):
+  def parametrize( self, iter=100, alg='L-BFGS-B' ):
     theta = np.concatenate((self.weight, self.bias))
     result = opt.minimize(Neural.cost, theta, args=(self), jac=Neural.gradient,
       method=alg, options={'maxiter': iter})
@@ -216,17 +216,17 @@ class Neural(object):
     self.assign(result.x)
     return
 
-  def assign(self, theta):
+  def assign( self, theta ):
     numweight = self.weight.shape[0]
     self.weight = theta[:numweight]
     self.bias = theta[numweight:]
 
-  def cost(theta, network):
+  def cost( theta, network ):
     network.assign(theta)
     return network.cost()
     
   
-  def gradient(theta, network):
+  def gradient( theta, network ):
     network.assign(theta)
     return network.bp()
 

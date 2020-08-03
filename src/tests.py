@@ -19,7 +19,8 @@ def main(argv):
   # test1()
   # test2()
   # test3()
-  test4()  
+  # test4()  
+  test5()
 
   return
 
@@ -267,12 +268,35 @@ def test4():
 
   print("\nGradient descent: ")
   net = nn.Neural(layers, X, y)
-  net.l = 30
+  net.l = 300
   net.parametrize(1000)
   p = net.predict(X)
   print("Training accuracy: ", np.mean(p == y) * 100)
 
   return
 
+def test5():
+  print("\n\nTest 5 - Algorithm Tweaks (Bias & Variance)")
+  print("Expected / Actual:")
+
+  print("\nRegularized Linear Regression: ")
+  X, y = ut.read_mat('mat/ex5data1.mat')
+  X = ut.create_design(X)
+  theta = np.array([1, 1])
+  print("303.993 / ", alg.SSD(theta, X, y, 1))
+  grad = alg.SSD_gradient(theta, X, y, 1)
+  print("-15.30 / ", grad[0])
+  print("598.250 / ", grad[1])
+
+  print("\nLearning Curve:")
+  raw = ut.read_mat_raw('mat/ex5data1.mat')
+  Xval = ut.create_design(raw['Xval'])
+  yval = raw['yval'].reshape(-1)
+  pt.plotLearningCurve(X, y, Xval, yval, 0)
+
+
+
+
+  return
 if(__name__ == "__main__"):
   main(sys.argv[1:])
