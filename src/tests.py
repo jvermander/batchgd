@@ -9,25 +9,25 @@ import scipy.optimize as opt
 import utils as ut
 import algorithms as alg
 import plots as pt
+import matplotlib.pyplot as mpl
 import neuralnets as nn
 
 np.set_printoptions(edgeitems=5)
 np.core.arrayprint._line_width = 180
-warnings.filterwarnings("ignore", category=RuntimeWarning) 
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 def main(argv):
   # test1()
   # test2()
   # test3()
-  # test4()  
+  # test4()
   test5()
-
   return
 
 def test1():
   print("\n\nTest 1 - Linear Regression")
   print("Expected / Actual:")
-  
+
   print("\nBatch gradient descent: ")
   X, y = ut.read_csv('csv/ex1data1.csv')
   X = ut.create_design(X)
@@ -41,7 +41,7 @@ def test1():
   print("1.166362 / ", theta[1])
   print("34962.991574 / ", ut.predict(np.array([[6.1101]]), theta)[0] * 10 ** 4)
   print("45342.450129 / ", ut.predict(np.array([[7]]), theta)[0] * 10 ** 4)
-  
+
   print("\nWith optimization: ")
   theta = np.zeros((X.shape[1]),)
   res = opt.minimize(alg.SSD, theta, (X, y), jac=alg.SSD_gradient, method='Newton-CG', options={"maxiter": 1500})
@@ -50,7 +50,7 @@ def test1():
   print("1.166362 / ", theta[1])
   print("34962.991574 / ", ut.predict(np.array([[6.1101]]), theta)[0] * 10 ** 4)
   print("45342.450129 / ", ut.predict(np.array([[7]]), theta)[0] * 10 ** 4)
-  
+
   print("\nNormalized batch gradient descent:")
   X, y = ut.read_csv('csv/ex1data2.csv')
   X, mu, sigma = ut.normalize_features(X)
@@ -95,8 +95,8 @@ def test2():
   print("-0.1000 / ", grad[0])
   print("-12.0092 / ", grad[1])
   print("-11.2628 / ", grad[2])
-  res = opt.minimize(alg.cross_ent, theta, (X, y), 
-               method='BFGS', 
+  res = opt.minimize(alg.cross_ent, theta, (X, y),
+               method='BFGS',
                jac=alg.cross_ent_gradient,
                options={'maxiter': 400})
   print("0.203498 / ", res.fun)
@@ -125,38 +125,38 @@ def test2():
   print("0.0129 / ", grad[12])
   print("0.0388 / ", grad[27])
   l = 0
-  res = opt.minimize(alg.cross_ent, theta, (X, y, l), 
-               method='BFGS', 
+  res = opt.minimize(alg.cross_ent, theta, (X, y, l),
+               method='BFGS',
                jac=alg.cross_ent_gradient,
                options={'maxiter': 1000})
   theta = res.x
   p = np.mean(np.round(alg.sigmoid(X @ theta)) == y) * 100
   print(">= 88.983051 / ", p)
-  
+
   theta = np.zeros((X.shape[1],))
   l = 1
-  res = opt.minimize(alg.cross_ent, theta, (X, y, l), 
-               method='BFGS', 
+  res = opt.minimize(alg.cross_ent, theta, (X, y, l),
+               method='BFGS',
                jac=alg.cross_ent_gradient,
                options={'maxiter': 1000})
   theta = res.x
   p = np.mean(np.round(alg.sigmoid(X @ theta)) == y) * 100
   print(">= 83.050847 / ", p)
-  
+
   theta = np.zeros((X.shape[1],))
   l = 10
-  res = opt.minimize(alg.cross_ent, theta, (X, y, l), 
-               method='BFGS', 
+  res = opt.minimize(alg.cross_ent, theta, (X, y, l),
+               method='BFGS',
                jac=alg.cross_ent_gradient,
                options={'maxiter': 1000})
   theta = res.x
   p = np.mean(np.round(alg.sigmoid(X @ theta)) == y) * 100
   print(">= 74.576271 / ", p)
-  
+
   theta = np.zeros((X.shape[1],))
   l = 100
-  res = opt.minimize(alg.cross_ent, theta, (X, y, l), 
-               method='BFGS', 
+  res = opt.minimize(alg.cross_ent, theta, (X, y, l),
+               method='BFGS',
                jac=alg.cross_ent_gradient,
                options={'maxiter': 1000})
   theta = res.x
@@ -167,7 +167,7 @@ def test3():
   print("\n\nTest 3 - Multiclass Logistic Regression & Neural Networks")
   print("Expected / Actual:")
 
-  print("\nMulticlass LR:")  
+  print("\nMulticlass LR:")
   X, y = ut.read_mat('mat/ex3data1.mat')
   for i in range(y.shape[0]):
     if(y[i] == 10): y[i] = 0;
@@ -183,18 +183,18 @@ def test3():
   print("-0.548558 / %f" % grad[1])
   print("0.724722 / %f" % grad[2])
   print("1.398003 / %f" % grad[3])
-  
+
   degree = 10
   l = 0.1
   theta = alg.multiclass_logreg(X, y, l, degree)
   p = ut.multiclass_prediction(theta, X)
   print(">= 95 / %f" % (np.mean(p == y) * 100))
-  
+
   print("\nNeural Networks (Forward Propagation): ")
   data = ut.read_mat_raw('mat/ex3weights.mat')
   theta1 = data['Theta1']
   theta2 = data['Theta2']
-  
+
   X, y = ut.read_mat('mat/ex3data1.mat')
   p = test3neuralnet(theta1, theta2, X)
   print("Predicted: ", p)
@@ -244,7 +244,7 @@ def test4():
 
   print("\nSigmoid Derivative:")
   print("0.25 / ", net.sigmoid_deriv(net.sigmoid(0)))
-  
+
   net.l = 0
   print("\nBackpropagation: ")
   grad = net.bp()
@@ -258,7 +258,7 @@ def test4():
   print("-0.000037065 / %.9f" % grad[-(net.bias.shape[0]-15)])
   print("0.00024755 / %.8f" % grad[-1])
   print("< 1e-9 / ", nn.Neural.debug_bp())
-  
+
   print("\nBackpropagation, with regularization:")
   net.l = 3
   print("0.576051 / %f" % net.binary_cross_entropy())
@@ -290,13 +290,52 @@ def test5():
 
   print("\nLearning Curve:")
   raw = ut.read_mat_raw('mat/ex5data1.mat')
-  Xval = ut.create_design(raw['Xval'])
+  X = raw['X']
+  y = raw['y'].reshape(-1)
+  
+  Xval = raw['Xval']
   yval = raw['yval'].reshape(-1)
-  pt.plotLearningCurve(X, y, Xval, yval, 0)
+  print("Check plot")
+  # pt.plot_learning_curve(ut.create_design(X), y, ut.create_design(Xval), yval, 0)
 
+  print("\nFitting polynomial regression:" )
+  p = 8
+  X_poly = ut.poly_features(X, p)
+  X_poly, mu, sigma = ut.normalize_features(X_poly)
+  X_poly = ut.create_design(X_poly)
 
+  Xval = ut.poly_features(Xval, p)
+  Xval -= mu
+  Xval /= sigma
+  Xval = ut.create_design(Xval)
 
+  l = 0.01
+  theta = alg.parametrize_linear(X_poly, y, l)
 
+  print("Check plot, l =", l)
+  pt.fit_plot(X, y, mu, sigma, theta, p)
+  pt.plot_learning_curve(X_poly, y, Xval, yval, l)
+
+  print("\nOptimize regularization:")
+  print("Check plot")
+
+  l = pt.plot_validation_curve(X_poly, y, Xval, yval)
+  
+  Xtest = raw['Xtest']
+  ytest = raw['ytest'].reshape(-1)
+  Xtest = ut.poly_features(Xtest, p)
+  Xtest -= mu
+  Xtest /= sigma
+  Xtest = ut.create_design(Xtest)
+
+  theta = alg.parametrize_linear(X_poly, y, l)
+  print("3.8599 / ", alg.SSD(theta, Xtest, ytest, 0))
+  
+  print("\nRandomized learning curve:")
+  print("Check plot")
+  pt.plot_randomized_learning_curve(X_poly, y, Xval, yval, 0.01)
   return
+
+
 if(__name__ == "__main__"):
   main(sys.argv[1:])

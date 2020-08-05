@@ -21,7 +21,6 @@ def read_mat( path ):
 def read_mat_raw ( path ):
   return io.loadmat(path)
 
-
 def normalize_features( X ):
   mu = np.zeros((X.shape[1],))
   sigma = np.zeros((X.shape[1],))
@@ -64,10 +63,18 @@ def add_features( X1, X2, degree ):
   assert(k == columns)
   return result
 
+def poly_features( X, p ):
+  assert(X.shape[1] == 1)
+  X_poly = np.zeros((X.shape[0], p))
 
+  for i in range(p):
+    X_poly[:, i] = X.reshape(-1) ** (i+1)
+  
+  return X_poly
 
 def multiclass_prediction( theta, X ):
   X = create_design(X)
   return np.argmax(theta @ X.T, axis=0)
 
-
+def find_lambda( X, y, Xval, yval ):
+  pass

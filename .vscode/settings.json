@@ -1,0 +1,8 @@
+{
+  "python.pythonPath": "/usr/bin/python3.5m",
+  "python.linting.enabled": false,
+  "problems.decorations.enabled": false,
+  "workbench.colorCustomizations": {
+    "editorError.foreground": "#00000000",
+}
+}
