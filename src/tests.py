@@ -12,6 +12,8 @@ import plots as pt
 import matplotlib.pyplot as mpl
 import neuralnets as nn
 
+import kmeans as km
+
 np.set_printoptions(edgeitems=5)
 np.core.arrayprint._line_width = 180
 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -21,7 +23,9 @@ def main(argv):
   # test2()
   # test3()
   # test4()
-  test5()
+  # test5()
+
+  test7()
   return
 
 def test1():
@@ -336,6 +340,61 @@ def test5():
   pt.plot_randomized_learning_curve(X_poly, y, Xval, yval, 0.01)
   return
 
+def test7():
+  print("\n\nTest 7 - K-Means Clustering & PCA")
+  print("Expected / Actual:")
+
+  print("\nCentroid assignment:")
+  raw = ut.read_mat_raw('mat/ex7data2.mat')
+  X = raw['X']
+  K = 3
+  mu = np.array([[3, 3], [6, 2], [8, 5]])
+  idx = km.assign_centroids(X, mu)
+  print("0 /", idx[0])
+  print("2 /", idx[1])
+  print("1 /", idx[2])
+  print("1 /", idx[-3])
+  print("1 /", idx[-2])
+  print("0 /", idx[-1])
+
+  print("\nCentroid adjustment:")
+  mu = km.adjust_centroids(X, idx, K)
+  print("2.428301 /", mu[0,0])
+  print("3.157924 /", mu[0,1])
+  print("5.813503 /", mu[1,0])
+  print("2.633656 /", mu[1,1])
+  print("7.119387 /", mu[2,0])
+  print("3.616684 /", mu[2,1])
+
+  print("\nPixel clustering:")
+  A = mpl.imread('img/bird_small.png')
+  # mpl.imshow(A, extent=[0, 1, 0, 1])
+  # mpl.colorbar()
+  # mpl.show()
+  imgsz = A.shape
+  A = A.reshape(imgsz[0] * imgsz[1], imgsz[2])
+  K = 16
+  iter = 10
+  
+  mu, idx = km.clusterize(A, K, iter)
+  min = km.compute_cost(A, mu, idx)
+  print("Iteration %d cost - %.10f" % (0, min))
+
+  for i in range(1, 20):
+    mu_tmp, idx_tmp = km.clusterize(A, K, iter)
+    curr = km.compute_cost(A, mu_tmp, idx_tmp)
+    print("Iteration %d cost - %.10f" % (i, curr))
+    if(curr < min):
+      min = curr
+      mu = mu_tmp
+      idx = idx_tmp
+
+  print("Minimum cost found - %.10f" % min)
+
+  A_new = mu[idx].reshape(imgsz[0], imgsz[1], imgsz[2])
+  mpl.imshow(A_new, extent=[0, 1, 0, 1])
+  mpl.colorbar()
+  mpl.show()
 
 if(__name__ == "__main__"):
   main(sys.argv[1:])
