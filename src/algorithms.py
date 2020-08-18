@@ -95,3 +95,30 @@ def multiclass_logreg( X, y, l, degree ):
     # print(res)
     theta[i, :] = res.x
   return theta
+
+# expects X as (n, m)
+def PCA( X ):
+  n = X.shape[0]
+  m = X.shape[1]
+
+  sigma = X @ X.T / m
+  assert(sigma.shape[0] == n and sigma.shape[1] == n)
+  U, S, D = np.linalg.svd(sigma)
+
+  return U, S
+  
+def project_data( X, U, K ):
+  Z = U[:, :K].T @ X
+  return Z
+
+def recover_data( Z, U, K ):
+  X_approx = U[:, :K] @ Z
+  return X_approx
+
+def compute_retention( S, K ):
+  assert(K <= S.shape[0])
+
+  b = np.sum(S)
+  a = np.sum(S[:K])
+  variance = a / b
+  return variance

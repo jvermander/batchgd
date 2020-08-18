@@ -379,8 +379,7 @@ def test7():
   mu, idx = km.clusterize(A, K, iter)
   min = km.compute_cost(A, mu, idx)
   print("Iteration %d cost - %.10f" % (0, min))
-
-  for i in range(1, 20):
+  for i in range(1, 1):
     mu_tmp, idx_tmp = km.clusterize(A, K, iter)
     curr = km.compute_cost(A, mu_tmp, idx_tmp)
     print("Iteration %d cost - %.10f" % (i, curr))
@@ -392,9 +391,27 @@ def test7():
   print("Minimum cost found - %.10f" % min)
 
   A_new = mu[idx].reshape(imgsz[0], imgsz[1], imgsz[2])
-  mpl.imshow(A_new, extent=[0, 1, 0, 1])
-  mpl.colorbar()
-  mpl.show()
+  # mpl.imshow(A_new, extent=[0, 1, 0, 1])
+  # mpl.colorbar()
+  # mpl.show()
+
+  print("\nPrincipal Component Analysis: ")
+  raw = ut.read_mat_raw('mat/ex7data1.mat')
+  X = raw['X']
+  X = ut.normalize_features(X)[0].T
+  U, S = alg.PCA(X)
+  print("0.707 /", np.abs(U[0,0]))
+  print("0.707 /", np.abs(U[1,0]))
+
+  K = 1 
+  Z = alg.project_data(X, U, K)
+  print("1.481 / ", np.abs(Z[0,0]))
+
+  X_app = alg.recover_data(Z, U, K)
+  print("1.047 / ", np.abs(X_app[0,0]))
+  print("1.047 / ", np.abs(X_app[1,0]))
+  # print(X_app.T)
+  print("% Variance =", alg.compute_retention(S, K))
 
 if(__name__ == "__main__"):
   main(sys.argv[1:])
